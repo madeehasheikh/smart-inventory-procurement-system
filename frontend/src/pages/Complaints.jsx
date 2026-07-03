@@ -51,7 +51,7 @@ const Complaints = () => {
       const res = await axios.put(`/api/complaints/${id}`, {
         status,
         resolution_notes,
-        assigned_to: user._id
+        assigned_to: user.id || user._id
       });
       return res.data;
     },
@@ -73,7 +73,7 @@ const Complaints = () => {
   const handleResolveAction = (status) => {
     if (!activeTicket) return;
     resolveMutation.mutate({
-      id: activeTicket._id,
+      id: activeTicket.id || activeTicket._id,
       status,
       resolution_notes: notes || 'Ticket updated'
     });
@@ -118,16 +118,19 @@ const Complaints = () => {
               <div className="p-12 text-center text-xs text-slate-400">No issues reported yet.</div>
             ) : (
               <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                {tickets.map(ticket => (
-                  <div
-                    key={ticket._id}
-                    onClick={() => { setActiveTicket(ticket); setNotes(''); }}
-                    className={`p-4 rounded-xl border text-xs cursor-pointer transition-all duration-200 hover:scale-[1.01] ${
-                      activeTicket?._id === ticket._id
-                        ? 'border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10'
-                        : 'border-slate-100 dark:border-slate-850 hover:bg-slate-50/50 dark:hover:bg-slate-900/10'
-                    }`}
-                  >
+                {tickets.map(ticket => {
+                  const tId = ticket.id || ticket._id;
+                  const activeId = activeTicket?.id || activeTicket?._id;
+                  return (
+                    <div
+                      key={tId}
+                      onClick={() => { setActiveTicket(ticket); setNotes(''); }}
+                      className={`p-4 rounded-xl border text-xs cursor-pointer transition-all duration-200 hover:scale-[1.01] ${
+                        activeId === tId
+                          ? 'border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10'
+                          : 'border-slate-100 dark:border-slate-850 hover:bg-slate-50/50 dark:hover:bg-slate-900/10'
+                      }`}
+                    >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-slate-900 dark:text-white">{ticket.type}</span>
                       <span className={`px-2 py-0.5 rounded text-[9px] font-semibold border ${
@@ -145,7 +148,8 @@ const Complaints = () => {
                       {new Date(ticket.created_at).toLocaleDateString()}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -159,7 +163,7 @@ const Complaints = () => {
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-850 pb-4">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">Ticket details</h3>
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">Ticket ID: {activeTicket._id.slice(0, 8)}...</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">Ticket ID: {(activeTicket.id || activeTicket._id || '').slice(0, 8)}...</span>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-semibold border ${
                   activeTicket.status === 'Closed' || activeTicket.status === 'Resolved'

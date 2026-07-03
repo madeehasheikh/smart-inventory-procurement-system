@@ -219,10 +219,11 @@ const Purchases = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
                   {orders.map((po) => {
-                    const vendorObj = vendors?.find(v => v._id === po.vendor_id);
+                    const vendorObj = vendors?.find(v => (v.id || v._id) === po.vendor_id);
+                    const poId = po.id || po._id;
                     return (
-                      <tr key={po._id} className="hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors">
-                        <td className="py-3.5 pl-2 font-bold uppercase">{po._id.slice(0, 8)}...</td>
+                      <tr key={poId} className="hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors">
+                        <td className="py-3.5 pl-2 font-bold uppercase">{(poId || '').slice(0, 8)}...</td>
                         <td className="py-3.5 font-medium text-slate-950 dark:text-white">{vendorObj ? vendorObj.name : 'Unknown Vendor'}</td>
                         <td className="py-3.5 text-slate-400">
                           {po.items.map((it, idx) => (
@@ -251,7 +252,7 @@ const Purchases = () => {
                           <td className="py-3.5 text-right pr-2">
                             {po.status === 'Draft' && (
                               <button
-                                onClick={() => handlePOStatusUpdate(po._id, 'Sent to Vendor')}
+                                onClick={() => handlePOStatusUpdate(po.id || po._id, 'Sent to Vendor')}
                                 className="px-2.5 py-1 text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors"
                               >
                                 Send to Vendor
@@ -259,7 +260,7 @@ const Purchases = () => {
                             )}
                             {po.status === 'Sent to Vendor' && (
                               <button
-                                onClick={() => handlePOStatusUpdate(po._id, 'Received')}
+                                onClick={() => handlePOStatusUpdate(po.id || po._id, 'Received')}
                                 className="px-2.5 py-1 text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all hover:scale-105 active:scale-95 shadow-sm"
                               >
                                 Mark Received (Adds Stock)
@@ -290,58 +291,61 @@ const Purchases = () => {
           ) : !vendors || vendors.length === 0 ? (
             <div className="col-span-full p-12 text-center text-xs text-slate-400">No vendors stored in system.</div>
           ) : (
-            vendors.map((vendor) => (
-              <div key={vendor._id} className="p-5 rounded-2xl glass-card border border-slate-200/40 dark:border-slate-800/40 flex flex-col justify-between space-y-4">
-                
-                {/* Header info */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-900 dark:text-white">{vendor.name}</h4>
-                    <span className="text-[10px] text-slate-400 font-medium">Rep: {vendor.contact_person}</span>
+            vendors.map((vendor) => {
+              const vendorId = vendor.id || vendor._id;
+              return (
+                <div key={vendorId} className="p-5 rounded-2xl glass-card border border-slate-200/40 dark:border-slate-800/40 flex flex-col justify-between space-y-4">
+                  
+                  {/* Header info */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">{vendor.name}</h4>
+                      <span className="text-[10px] text-slate-400 font-medium">Rep: {vendor.contact_person}</span>
+                    </div>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
+                      <Award className="w-3.5 h-3.5" />
+                      <span>{vendor.rating.toFixed(1)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-bold">
-                    <Award className="w-3.5 h-3.5" />
-                    <span>{vendor.rating.toFixed(1)}</span>
-                  </div>
-                </div>
 
-                {/* Categories tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  {vendor.categories.map((c, i) => (
-                    <span key={i} className="px-2 py-0.5 text-[9px] rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">{c}</span>
-                  ))}
-                </div>
-
-                {/* Contact numbers */}
-                <div className="space-y-1 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-850 pt-3">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-slate-500" />
-                    <span className="truncate">{vendor.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-slate-500" />
-                    <span>{vendor.phone}</span>
-                  </div>
-                </div>
-
-                {/* Rating controls */}
-                <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-850 pt-3">
-                  <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Rate Supplier</span>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => handleRateVendor(vendor._id, star)}
-                        className="text-slate-500 hover:text-amber-400 transition-colors"
-                      >
-                        <Star className="w-3.5 h-3.5 hover:fill-amber-400" />
-                      </button>
+                  {/* Categories tags */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {vendor.categories.map((c, i) => (
+                      <span key={i} className="px-2 py-0.5 text-[9px] rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">{c}</span>
                     ))}
                   </div>
-                </div>
 
-              </div>
-            ))
+                  {/* Contact numbers */}
+                  <div className="space-y-1 text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-850 pt-3">
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="truncate">{vendor.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 text-slate-500" />
+                      <span>{vendor.phone}</span>
+                    </div>
+                  </div>
+
+                  {/* Rating controls */}
+                  <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-850 pt-3">
+                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Rate Supplier</span>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => handleRateVendor(vendorId, star)}
+                          className="text-slate-500 hover:text-amber-400 transition-colors"
+                        >
+                          <Star className="w-3.5 h-3.5 hover:fill-amber-400" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              );
+            })
           )}
         </div>
       )}
@@ -449,7 +453,7 @@ const Purchases = () => {
                 <select
                   required value={poForm.request_id}
                   onChange={(e) => {
-                    const reqObj = openRequests?.find(r => r._id === e.target.value);
+                    const reqObj = openRequests?.find(r => (r.id || r._id) === e.target.value);
                     setPoForm({
                       ...poForm,
                       request_id: e.target.value,
@@ -461,9 +465,12 @@ const Purchases = () => {
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-700/60 bg-slate-950/40 text-white focus:outline-none"
                 >
                   <option value="">Select open request...</option>
-                  {openRequests?.map(r => (
-                    <option key={r._id} value={r._id}>[{r.department_id}] {r.item_name} - Qty {r.quantity}</option>
-                  ))}
+                  {openRequests?.map(r => {
+                    const reqId = r.id || r._id;
+                    return (
+                      <option key={reqId} value={reqId}>[{r.department_id}] {r.item_name} - Qty {r.quantity}</option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -475,9 +482,12 @@ const Purchases = () => {
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-700/60 bg-slate-950/40 text-white focus:outline-none"
                 >
                   <option value="">Select vendor supplier...</option>
-                  {vendors?.map(v => (
-                    <option key={v._id} value={v._id}>{v.name}</option>
-                  ))}
+                  {vendors?.map(v => {
+                    const vId = v.id || v._id;
+                    return (
+                      <option key={vId} value={vId}>{v.name}</option>
+                    );
+                  })}
                 </select>
               </div>
 

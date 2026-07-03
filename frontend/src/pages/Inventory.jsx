@@ -134,7 +134,7 @@ const Inventory = () => {
     if (showAddModal) {
       addMutation.mutate(formData);
     } else if (showEditModal && selectedItem) {
-      editMutation.mutate({ id: selectedItem._id, updatedFields: formData });
+      editMutation.mutate({ id: selectedItem.id || selectedItem._id, updatedFields: formData });
     }
   };
 
@@ -193,9 +193,12 @@ const Inventory = () => {
             className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white"
           >
             <option value="">All Departments</option>
-            {deptsData?.map(d => (
-              <option key={d._id} value={d._id}>{d.name}</option>
-            ))}
+            {deptsData?.map(d => {
+              const dId = d.id || d._id;
+              return (
+                <option key={dId} value={dId}>{d.name}</option>
+              );
+            })}
           </select>
 
           <select 
@@ -277,8 +280,10 @@ const Inventory = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
-                  {invData.items.map((item) => (
-                    <tr key={item._id} className="group hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors">
+                  {invData.items.map((item) => {
+                    const itemId = item.id || item._id;
+                    return (
+                    <tr key={itemId} className="group hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors">
                       {/* Item details */}
                       <td className="py-3.5 pl-2 flex items-center gap-3">
                         <img 
@@ -336,7 +341,7 @@ const Inventory = () => {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteClick(item._id)}
+                            onClick={() => handleDeleteClick(item.id || item._id)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
                             title="Delete"
                           >
@@ -345,7 +350,8 @@ const Inventory = () => {
                         </td>
                       )}
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -396,7 +402,7 @@ const Inventory = () => {
               </div>
             )}
 
-            <form onSubmit={formFormSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleFormSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Item Name</label>
                 <input 
@@ -448,9 +454,12 @@ const Inventory = () => {
                   value={formData.department_id} onChange={(e) => setFormData({...formData, department_id: e.target.value})}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none"
                 >
-                  {deptsData?.map(d => (
-                    <option key={d._id} value={d._id}>{d.name}</option>
-                  ))}
+                  {deptsData?.map(d => {
+                    const dId = d.id || d._id;
+                    return (
+                      <option key={dId} value={dId}>{d.name}</option>
+                    );
+                  })}
                 </select>
               </div>
 
