@@ -74,7 +74,7 @@ const Requests = () => {
   const handleAction = (status, customComments = '') => {
     if (!activeRequest) return;
     statusMutation.mutate({
-      id: activeRequest._id,
+      id: activeRequest.id || activeRequest._id,
       status,
       comments: customComments || comments
     });
@@ -140,18 +140,21 @@ const Requests = () => {
               <div className="p-12 text-center text-xs text-slate-400">No requests raised yet.</div>
             ) : (
               <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                {requests.map(req => (
-                  <div
-                    key={req._id}
-                    onClick={() => { setActiveRequest(req); setComments(''); }}
-                    className={`p-4 rounded-xl border text-xs cursor-pointer transition-all duration-200 hover:scale-[1.01] ${
-                      activeRequest?._id === req._id
-                        ? 'border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10'
-                        : 'border-slate-100 dark:border-slate-850 hover:bg-slate-50/50 dark:hover:bg-slate-900/10'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-900 dark:text-white truncate max-w-[150px]">{req.item_name}</span>
+                {requests.map(req => {
+                  const reqId = req.id || req._id;
+                  const activeId = activeRequest?.id || activeRequest?._id;
+                  return (
+                    <div
+                      key={reqId}
+                      onClick={() => { setActiveRequest(req); setComments(''); }}
+                      className={`p-4 rounded-xl border text-xs cursor-pointer transition-all duration-200 hover:scale-[1.01] ${
+                        activeId === reqId
+                          ? 'border-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10'
+                          : 'border-slate-100 dark:border-slate-850 hover:bg-slate-50/50 dark:hover:bg-slate-900/10'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 dark:text-white truncate max-w-[150px]">{req.item_name}</span>
                       <span className={`px-2 py-0.5 rounded text-[9px] font-semibold border ${
                         req.status === 'Completed'
                           ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
@@ -168,7 +171,8 @@ const Requests = () => {
                       <span>{new Date(req.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -183,7 +187,9 @@ const Requests = () => {
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-850 pb-4">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">{activeRequest.item_name}</h3>
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">REQ-ID: {activeRequest._id.slice(0, 8)}...</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">
+                    REQ-ID: {(activeRequest.id || activeRequest._id || '').slice(0, 8)}...
+                  </span>
                 </div>
                 <div className="text-right">
                   <span className="block text-xs font-semibold text-slate-500">Estimated cost</span>
